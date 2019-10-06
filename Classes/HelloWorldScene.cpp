@@ -137,8 +137,12 @@ bool HelloWorld::init()
 
 void HelloWorld::update(float dt)
 {
-	static bool flag = false;
+    auto sprite = getChildByName("smallsquare");
+    SmallSquare* sprite0 = dynamic_cast<SmallSquare*>(sprite);
+    sprite0->updatePosition(dt);
+/*	static bool flag = false;
 	float y = 0;
+    float x = 0;
 	if (!flag)
 	{
 		auto sprite = getChildByName("smallsquare");
@@ -152,8 +156,22 @@ void HelloWorld::update(float dt)
 			flag = true;
 			return;
 		}
-		sprite->setPosition(sprite->getPosition().x, y);
-	}	
+		SmallSquare* sprite0 = dynamic_cast<SmallSquare*>(sprite);
+        auto keyState = sprite0->getKeyState();
+        x = sprite->getPosition().x;
+        if (keyState[0])
+        {
+            x -= 20.0 * dt;
+        }
+
+        if (keyState[1])
+        {
+            x += 20.0 * dt;
+        }
+
+		sprite->setPosition(x, y);
+	}
+*/	
 }
 
 void HelloWorld::menuCloseCallback(Ref* pSender)

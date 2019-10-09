@@ -99,3 +99,100 @@ void SmallSquare::updatePosition(float dt)
 		this->setPosition(x, y);
 	}	
 }
+
+Square * Square::creatSquare(const cocos2d::Size & size, const cocos2d::Vec2 & position, const cocos2d::Color4B color)
+{
+	Square *square= new (std::nothrow) Square();
+	if (square && square->init())
+	{
+		square->autorelease();
+		square->initSquare(size, position, color);
+		return square;
+	}
+	CC_SAFE_DELETE(square);
+	return nullptr;
+}
+
+void Square::initSquare(const cocos2d::Size & size, const cocos2d::Vec2 & position, const cocos2d::Color4B & color)
+{
+	auto layerColor = LayerColor::create(color, size.width, size.height);
+	this->setContentSize(size);
+	this->addChild(layerColor, 0);
+	this->setPosition(position);
+}
+
+ComposeSquare* ComposeSquare::createComposeSquare(const cocos2d::Vec2 & position, std::function<void(Square *node[], int num)>& fun)
+{
+	ComposeSquare *square = new (std::nothrow) ComposeSquare();
+	if (square && square->init())
+	{
+		square->autorelease();
+		square->initComposeSquare(position, fun);
+		return square;
+	}
+	CC_SAFE_DELETE(square);
+	return nullptr;
+}
+
+void ComposeSquare::initComposeSquare(const cocos2d::Vec2 & position, std::function<void(Square *node[], int num)>& fun)
+{
+	for (int i = 0; i < 4; i++)
+	{
+		square[i] = Square::creatSquare(defaultSquareSize, Vec2::ZERO);
+		if (i == 0)
+		{
+			auto squareBody = PhysicsBody::createBox(square[i]->getContentSize(), PhysicsMaterial(0.5, 0.1, 0.1));
+			square[i]->setPhysicsBody(squareBody);
+		}
+	}
+	fun(square, 4);
+	for (int i = 0; i < 4; i++)
+	{
+		this->addChild(square[i]);
+	}
+	this->setPosition(position);
+}
+
+ShapeFactory* ShapeFactory::creatShapeFactory()
+{
+	ShapeFactory *shapeFactory = new (std::nothrow) ShapeFactory();
+	if (shapeFactory)
+	{
+		shapeFactory->autorelease();
+		return shapeFactory;
+	}
+	CC_SAFE_DELETE(shapeFactory);
+	return nullptr;
+}
+
+ComposeSquare * ShapeFactory::createProduct(const cocos2d::Vec2 & position, BlockType type)
+{
+	std::function<void(Square *node[], int num)> fun;
+	switch (type)
+	{
+	case BlockType::PENCIL:
+		fun = [](Square *node[], int num) 
+		{
+			assert(num == 4);
+			for (int i = 0; i < 4; i++)
+			{
+				node[i]->setPosition(Vec2(defaultSquareSize.width / 2, defaultSquareSize.height / 2 + defaultSquareSize.height * i));
+			}
+		}; break;
+	case BlockType::LEFT_L:
+		fun = [](Square *node[], int num) {}; break;
+	case BlockType::RIGHT_L:
+		fun = [](Square *node[], int num) {}; break;
+	case BlockType::LEFT_Z:
+		fun = [](Square *node[], int num) {}; break;
+	case BlockType::RIGHT_Z:
+		fun = [](Square *node[], int num) {}; break;
+	case BlockType::T_SHAPE:
+		fun = [](Square *node[], int num) {}; break;
+	case BlockType::SQUARE:
+		fun = [](Square *node[], int num) {}; break;
+	default:
+		fun = nullptr;
+	}
+	return 	ComposeSquare::createComposeSquare(position, fun);
+}

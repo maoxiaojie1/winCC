@@ -30,7 +30,11 @@ USING_NS_CC;
 
 Scene* HelloWorld::createScene()
 {
-    return HelloWorld::create();
+	auto scene = Scene::createWithPhysics();
+	scene->getPhysicsWorld()->setDebugDrawMask(PhysicsWorld::DEBUGDRAW_ALL);
+	auto layer = HelloWorld::create();
+	scene->addChild(layer);
+    return scene;
 }
 
 // Print useful error message instead of segfaulting when files are not there.
@@ -43,8 +47,6 @@ static void problemLoading(const char* filename)
 // on "init" you need to initialize your instance
 bool HelloWorld::init()
 {
-    //////////////////////////////
-    // 1. super init first
     if ( !Scene::init() )
     {
         return false;
@@ -52,12 +54,6 @@ bool HelloWorld::init()
 
     auto visibleSize = Director::getInstance()->getVisibleSize();
     Vec2 origin = Director::getInstance()->getVisibleOrigin();
-
-    /////////////////////////////
-    // 2. add a menu item with "X" image, which is clicked to quit the program
-    //    you may modify it.
-
-    // add a "close" icon to exit the progress. it's an autorelease object
     auto closeItem = MenuItemImage::create(
                                            "CloseNormal.png",
                                            "CloseSelected.png",
@@ -76,16 +72,9 @@ bool HelloWorld::init()
         closeItem->setPosition(Vec2(x,y));
     }
 
-    // create menu, it's an autorelease object
     auto menu = Menu::create(closeItem, NULL);
     menu->setPosition(Vec2::ZERO);
     this->addChild(menu, 1);
-
-    /////////////////////////////
-    // 3. add your codes below...
-
-    // add a label shows "Hello World"
-    // create and initialize a label
 
     auto label = Label::createWithTTF("Hello World", "fonts/Marker Felt.ttf", 24);
     if (label == nullptr)
@@ -117,6 +106,19 @@ bool HelloWorld::init()
         this->addChild(sprite, 0);
     }
 */
+	auto edgeRect = PhysicsBody::createEdgeBox(Size(visibleSize.width / 2, visibleSize.height));
+	auto edgeNode = Node::create();
+	edgeNode->setPhysicsBody(edgeRect);
+	edgeNode->setPosition(visibleSize.width / 2, visibleSize.height/2);
+	this->addChild(edgeNode);
+
+	auto factory = ShapeFactory::creatShapeFactory();
+	auto square = factory->createProduct(Vec2(visibleSize.width / 2, visibleSize.height / 2), BlockType::PENCIL);
+
+	//auto square = Square::creatSquare(Size(EACH_SQUARE_EDGE_LEN, EACH_SQUARE_EDGE_LEN), Vec2(visibleSize.width / 2, visibleSize.height / 2));
+	//auto squareBody = PhysicsBody::createBox(square->getContentSize());
+	//square->setPhysicsBody(squareBody);
+	this->addChild(square);
     auto sprite0 = SmallSquare::createSmallSquare(Size(5, 5), Vec2(0, 0));
     if (sprite0 == nullptr)
     {
@@ -124,14 +126,11 @@ bool HelloWorld::init()
     }
     else
     {
-        // position the sprite on the center of the screen
         sprite0->setPosition(Vec2(0, 400));
-		//sprite0->setVisible(true);
 		sprite0->setName("smallsquare");
-        // add the sprite as a child to this layer
         this->addChild(sprite0, 0);
     }
-	this->scheduleUpdate();
+	//this->scheduleUpdate();
     return true;
 }
 
@@ -140,38 +139,6 @@ void HelloWorld::update(float dt)
     auto sprite = getChildByName("smallsquare");
     SmallSquare* sprite0 = dynamic_cast<SmallSquare*>(sprite);
     sprite0->updatePosition(dt);
-/*	static bool flag = false;
-	float y = 0;
-    float x = 0;
-	if (!flag)
-	{
-		auto sprite = getChildByName("smallsquare");
-		y = sprite->getPosition().y - 50.0 * dt;
-		//auto point = convertToWorldSpaceAR(Vec2(x, y));
-		if (y < 25)
-		{
-			//point = convertToNodeSpaceAR(Vec2(0, 0));
-			sprite->setPosition(sprite->getPosition().x, 25);
-			//log("%f, %f\n", point.x, point.y);
-			flag = true;
-			return;
-		}
-		SmallSquare* sprite0 = dynamic_cast<SmallSquare*>(sprite);
-        auto keyState = sprite0->getKeyState();
-        x = sprite->getPosition().x;
-        if (keyState[0])
-        {
-            x -= 20.0 * dt;
-        }
-
-        if (keyState[1])
-        {
-            x += 20.0 * dt;
-        }
-
-		sprite->setPosition(x, y);
-	}
-*/	
 }
 
 void HelloWorld::menuCloseCallback(Ref* pSender)

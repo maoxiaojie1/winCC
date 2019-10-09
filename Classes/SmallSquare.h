@@ -3,9 +3,45 @@
 
 #include "cocos2d.h"
 #include <vector>
+#include <functional>
+#include <string>
+#include "ParamDef.h"
 
-#define SQUARE_FALLING_SPEED      100
-#define SQUARE_HORIZONTAL_SPEED   50
+static const cocos2d::Color4B defaultColorValue = cocos2d::Color4B(255, 0, 255, 255);
+static const cocos2d::Size defaultSquareSize = cocos2d::Size(EACH_SQUARE_EDGE_LEN, EACH_SQUARE_EDGE_LEN);
+
+class Square : public cocos2d::Node
+{
+public:
+	Square() {};
+	static Square* creatSquare(const cocos2d::Size &size, const cocos2d::Vec2 &position, const cocos2d::Color4B color = defaultColorValue);
+	void initSquare(const cocos2d::Size &size, const cocos2d::Vec2 &position, const cocos2d::Color4B &color);
+
+private:
+	CC_DISALLOW_COPY_AND_ASSIGN(Square);
+};
+
+class ComposeSquare : public cocos2d::Sprite
+{
+public:
+	ComposeSquare(){};
+	static ComposeSquare* createComposeSquare(const cocos2d::Vec2 &position, std::function<void(Square *node[], int num)> &fun);
+	void initComposeSquare(const cocos2d::Vec2 & position, std::function<void(Square *node[], int num)>& fun);
+private:
+	CC_DISALLOW_COPY_AND_ASSIGN(ComposeSquare);
+	Square * square[4];
+};
+
+class ShapeFactory : public cocos2d::Ref
+{
+public:
+	ShapeFactory() {};
+	static ShapeFactory * creatShapeFactory();
+	ComposeSquare* createProduct(const cocos2d::Vec2 & position, BlockType type);
+
+private:
+	CC_DISALLOW_COPY_AND_ASSIGN(ShapeFactory);
+};
 
 class SmallSquare : public cocos2d::Sprite
 {
